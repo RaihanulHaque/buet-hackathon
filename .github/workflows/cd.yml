@@ -1,0 +1,18 @@
+name: CD Pipelines
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Merge pull request Check
+        run: |
+          echo "Merging pull request"
