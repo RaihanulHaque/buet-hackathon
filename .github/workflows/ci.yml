@@ -38,8 +38,18 @@ jobs:
         run: docker build . -t myapp:latest
 
       - name: Run Docker container
-        run: docker run myapp:latest
+        run: |
+          docker run -d --name myapp_container -p 5000:5000 myapp:latest # Run in detached mode
+
+      - name: Wait for the application to be ready
+        run: |
+          for i in {1..30}; do # Wait for the app to be ready
+            curl -f http://localhost:5000/ && break || sleep 5;
+          done
 
       - name: Run tests
         run: |
-          docker run myapp:latest python -m unittest discover  # Adjust this based on your test structure
+          docker exec myapp_container python -m unittest discover  # Adjust this based on your test structure
+
+      - name: Stop and remove container
+        run: docker stop myapp_container && docker rm myapp_container
