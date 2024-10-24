@@ -1,0 +1,45 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+      - rahi # Add any branches you want to trigger on push
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      db: # Example if you need a database service
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build Docker image
+        run: docker build . -t myapp:latest
+
+      - name: Run Docker container
+        run: docker run myapp:latest
+
+      - name: Run tests
+        run: |
+          docker run myapp:latest python -m unittest discover  # Adjust this based on your test structure
