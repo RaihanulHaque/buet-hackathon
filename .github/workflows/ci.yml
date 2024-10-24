@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - rahi # Add any branches you want to trigger on push
+      - rahi
   pull_request:
     branches:
       - main
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      db: # Example if you need a database service
+      db:
         image: postgres:latest
         ports:
           - 5432:5432
@@ -38,8 +38,18 @@ jobs:
         run: docker build . -t myapp:latest
 
       - name: Run Docker container
-        run: docker run myapp:latest
-
-      - name: Run tests
         run: |
-          docker run myapp:latest python -m unittest discover  # Adjust this based on your test structure
+          docker run -d --name myapp_container -p 5000:5000 myapp:latest
+
+      - name: Wait for the application to be ready
+        run: |
+          for i in {1..30}; do
+            curl -f http://localhost:5000/ && break || sleep 5;
+          done
+
+      - name: Run tests with pytest
+        run: |
+          docker exec myapp_container pytest -v test_app.py  # Run your tests using pytest
+
+      - name: Stop and remove container
+        run: docker stop myapp_container && docker rm myapp_container

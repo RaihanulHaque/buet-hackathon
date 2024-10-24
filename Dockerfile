@@ -1,20 +1,19 @@
-# Use the official Python 3.10 image
-FROM python:3.10-slim
+# Dockerfile
 
-# Set the working directory
+FROM python:3.10
+
+# Set working directory
 WORKDIR /app
 
-# Copy the requirements.txt if you have any dependencies
+# Copy requirements and install them
 COPY requirements.txt .
-
-# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
+# Copy the application code
 COPY . .
 
-# Expose the port the app runs on (if needed)
-EXPOSE 8000
+# Expose the port the app runs on
+EXPOSE 5000
 
-# Command to run your application (replace with the actual start command of your app)
-CMD ["python", "app.py"]
+# Run the application using Gunicorn (optional, can also run Flask in debug mode for testing)
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]  # or you can use "python app.py" if you prefer
